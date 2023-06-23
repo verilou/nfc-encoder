@@ -1,0 +1,20 @@
+{
+  "name": "nfc",
+  "version": "1.0.0",
+  "description": "Script to read and write nfc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "louis castel",
+  "license": "ISC",
+  "dependencies": {
+    "@taptrack/ndef": "^1.0.3",
+    "barcode4nodejs": "^9.6.2-0.1",
+    "jsbarcode": "^3.11.5",
+    "ndef": "^0.2.0",
+    "ndef-lib": "^0.1.1",
+    "nfc-pcsc": "^0.8.1",
+    "nodemon": "^2.0.22"
+  }
+}
