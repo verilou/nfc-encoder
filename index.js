@@ -49,7 +49,7 @@ nfc.on('reader', (reader) => {
         // Create NDEF Message
 
         // Create an NDEF message
-      const textRecord = ndef.Utils.createUriRecord("http://www.youtube.com");
+      const textRecord = ndef.Utils.createUriRecord(code.trim());
       const message = new ndef.Message([textRecord]);
       const bytes = message.toByteArray();
       // convert the Uint8Array into to the Buffer and encapsulate it
