@@ -32,7 +32,6 @@ const encapsulate = (data, blockSize = 4) => {
 
 nfc.on('reader', (reader) => {
   console.log(`${reader.reader.name}  device attached`);
-  reader.aid = 'F222222222';
 
   reader.on('card', async (card) => {
     console.log(`${reader.reader.name}  card detected`);
