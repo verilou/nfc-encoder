@@ -1,34 +1,7 @@
 const { NFC } = require('nfc-pcsc');
 const ndef = require('@taptrack/ndef');
-
-const nfc = new NFC(); 
-
-const encapsulate = (data, blockSize = 4) => {
-
-  if (data.length > 0xfffe) {
-    throw new Error('Maximal NDEF message size exceeded.');
-  }
-
-  const prefix = Buffer.allocUnsafe(data.length > 0xfe ? 4 : 2);
-  prefix[0] = 0x03
-  ; // NDEF type
-  if (data.length > 0xfe) {
-    prefix[1] = 0xff;
-    prefix.writeInt16BE(data.length, 2);
-  } else {
-    prefix[1] = data.length;
-  }
-
-  const suffix = Buffer.from([0xfe]);
-
-  const totalLength = prefix.length + data.length + suffix.length;
-  const excessLength = totalLength % blockSize;
-  const rightPadding = excessLength > 0 ? blockSize - excessLength : 0;
-  const newLength = totalLength + rightPadding;
-	
-  return Buffer.concat([prefix, data, suffix], newLength);
-
-};
+const keypress = require('keypress');
+const nfc = new NFC();
 
 nfc.on('reader', (reader) => {
   console.log(`${reader.reader.name}  device attached`);
@@ -39,30 +12,35 @@ nfc.on('reader', (reader) => {
     console.log(`data read`, data);
     const payload = data.toString(); // utf8 is default encoding
     console.log(`data converted`, payload);
-    const readline = require('readline').createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    readline.question(`Card content`, async (code) => {
-      try {
-        // Create NDEF Message
-
-        // Create an NDEF message
-      const textRecord = ndef.Utils.createUriRecord(code.trim());
-      const message = new ndef.Message([textRecord]);
-      const bytes = message.toByteArray();
-      // convert the Uint8Array into to the Buffer and encapsulate it
-      const data = encapsulate(Buffer.from(bytes.buffer));
-
-      // data is instance of Buffer containing encapsulated NDEF message
-      await reader.write(4, data);
-        readline.close();
-        console.log('closed');
-      } catch (error) {
-        console.log('WTF', error);
-        readline.close();
+    keypress(process.stdin);
+    process.stdin.setRawMode(true);
+    
+    let inputBuffer = '';
+    let hasFinishTimer = false;
+    let hasBeenCallToWrite = false;
+    // Handle individual keypress events
+    process.stdin.on('keypress', async (ch, key) => {
+      if (inputBuffer.length > 8 && !inputBuffer.match("^https?://")) {
+        inputBuffer = '';
+      } else {
+        if (inputBuffer.length > 25 && inputBuffer.includes("https://ecardnfc.fr/")) {
+          if(!hasBeenCallToWrite) {
+            setTimeout(async() => await writeCard(inputBuffer, reader), 500);
+            hasBeenCallToWrite = true;
+          }
+        }
       }
+
+      
+
+      // Check if the key is Ctrl+C to exit the application
+      if (key && key.ctrl && key.name === 'c') {
+        console.log("HERE ? ")
+        process.exit();
+      }
+
+      // Append the received input to the buffer
+      inputBuffer += ch;
     });
   });
 
@@ -82,12 +60,44 @@ nfc.on('error', (err) => {
   console.log('an error occurred', err);
 });
 
-const getMissingAmountForModulo4 = (amount) => {
-  const remainder = amount % 4;
-  const missingAmount = remainder === 0 ? 0 : 4 - remainder;
-  return missingAmount;
+const encapsulate = (data, blockSize = 4) => {
+  if (data.length > 0xfffe) {
+    throw new Error('Maximal NDEF message size exceeded.');
+  }
+
+  const prefix = Buffer.allocUnsafe(data.length > 0xfe ? 4 : 2);
+  prefix[0] = 0x03; // NDEF type
+  if (data.length > 0xfe) {
+    prefix[1] = 0xff;
+    prefix.writeInt16BE(data.length, 2);
+  } else {
+    prefix[1] = data.length;
+  }
+
+  const suffix = Buffer.from([0xfe]);
+
+  const totalLength = prefix.length + data.length + suffix.length;
+  const excessLength = totalLength % blockSize;
+  const rightPadding = excessLength > 0 ? blockSize - excessLength : 0;
+  const newLength = totalLength + rightPadding;
+
+  return Buffer.concat([prefix, data, suffix], newLength);
 };
 
-const getBytes = (string) => {
-  return Buffer.byteLength(string, 'utf8');
-};
+const writeCard = async (string, reader) => {
+  console.log(string)
+  try {
+    const textRecord = ndef.Utils.createUriRecord(string.trim());
+    console.log(string)
+    const message = new ndef.Message([textRecord]);
+    const bytes = message.toByteArray();
+    const data = encapsulate(Buffer.from(bytes.buffer));
+    console.log(string)
+    await reader.write(4, data);
+    string = '';
+    console.log('Written');
+  } catch (error) {
+    console.log('WTF', error);
+    process.exit();
+  }
+}
