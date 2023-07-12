@@ -1,6 +1,4 @@
 const { NFC } = require('nfc-pcsc');
-const ndef = require('@taptrack/ndef');
-const keypress = require('keypress');
 const nfc = new NFC();
 
 nfc.on('reader', (reader) => {
