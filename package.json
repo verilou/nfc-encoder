@@ -9,14 +9,39 @@
   "author": "louis castel",
   "license": "ISC",
   "dependencies": {
+    "@pokusew/pcsclite": "^0.6.0",
     "@taptrack/ndef": "^1.0.3",
     "barcode4nodejs": "^9.6.2-0.1",
     "exceljs": "^4.3.0",
     "jsbarcode": "^3.11.5",
     "keypress": "^0.2.1",
+    "libxmljs": "^1.0.11",
     "ndef": "^0.2.0",
     "ndef-lib": "^0.1.1",
     "nfc-pcsc": "^0.8.1",
-    "nodemon": "^2.0.22"
+    "node-gyp": "^11.1.0",
+    "nodemon": "^2.0.22",
+    "pcsclite": "^1.0.1"
+  },
+  "bin": "./SEKAOP_Script/loadExcelFileToEncodeWithoutHttp.js",
+  "pkg": {
+    "scripts": "./SEKAOP_Script/loadExcelFileToEncodeWithoutHttp.js",
+    "assets": [
+      "node_modules/**"
+    ],
+    "nodeBinding": "./node_modules/**/*.node",
+    "outputPath": "./SEKAOP_Script/bin"
+  },
+  "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@pokusew/pcsclite",
+      "barcode4nodejs",
+      "libxmljs",
+      "pcsclite"
+    ]
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
   }
 }
